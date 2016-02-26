@@ -163,8 +163,6 @@ Fasthttp works with [RequestHandler](https://godoc.org/github.com/valyala/fastht
 
 Just try it out for yourself, the usage of FastHttpRouter is very straightforward. The package is compact and minimalistic, but also probably one of the easiest routers to set up.
 
-Just try it out for yourself, the usage of FastHttpRouter is very straightforward. The package is compact and minimalistic, but also probably one of the easiest routers to set up.
-
 ## Where can I find Middleware *X*?
 
 This package just provides a very efficient request router with a few extra features. The router is just a [`http.Handler`][http.Handler], you can chain any http.Handler compatible middleware before the router, for example the [Gorilla handlers](http://www.gorillatoolkit.org/pkg/handlers). Or you could [just write your own](https://justinas.org/writing-http-middleware-in-go/), it's very easy!
