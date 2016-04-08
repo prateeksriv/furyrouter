@@ -12,6 +12,18 @@ The router is optimized for high performance and a small memory footprint. It sc
 
 ## Features
 
+**Best Performance:** FastHttpRouter is the **fastest** go web framework in the [go-web-framework-benchmark](https://github.com/smallnest/go-web-framework-benchmark). Even faster than httprouter itself.
+
+- Basic Test: The first test case is to mock 0 ms, 10 ms, 100 ms, 500 ms processing time in handlers. The concurrency clients are 5000.
+
+![](http://ww3.sinaimg.cn/large/4c422e03jw1f2p6nyqh9ij20mm0aktbj.jpg)
+
+- Concurrency Test: In 30 ms processing time, the tets result for 100, 1000, 5000 clients is:
+
+![](http://ww4.sinaimg.cn/large/4c422e03jw1f2p6o1cdbij20lk09sack.jpg)
+
+See below for technical details of the implementation.
+
 **Only explicit matches:** With other routers, like [http.ServeMux](http://golang.org/pkg/net/http/#ServeMux),
 a requested URL path could match multiple patterns. Therefore they have some
 awkward pattern priority rules, like *longest match* or *first registered,
@@ -39,9 +51,6 @@ you. Because of the design of the router, path parameters are very cheap.
 garbage. In fact, the only heap allocations that are made, is by building the
 slice of the key-value pairs for path parameters. If the request path contains
 no parameters, not a single heap allocation is necessary.
-
-**Best Performance:** [Benchmarks speak for themselves](https://github.com/julienschmidt/go-http-routing-benchmark).
-See below for technical details of the implementation.
 
 **No more server crashes:** You can set a [Panic handler](http://godoc.org/github.com/buaazp/fasthttprouter#Router.PanicHandler) to deal with panics
 occurring during handling a HTTP request. The router then recovers and lets the
