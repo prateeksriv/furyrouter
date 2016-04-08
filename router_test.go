@@ -869,7 +869,7 @@ func TestRouterServeFiles(t *testing.T) {
 		if err != nil {
 			t.Fatalf("return error %s", err)
 		}
-	case <-time.After(100 * time.Millisecond):
+	case <-time.After(500 * time.Millisecond):
 		t.Fatalf("timeout")
 	}
 
