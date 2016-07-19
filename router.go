@@ -16,12 +16,12 @@
 //     "github.com/valyala/fasthttp"
 // )
 
-// func Index(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
+// func Index(ctx *fasthttp.RequestCtx) {
 //     fmt.Fprint(ctx, "Welcome!\n")
 // }
 
-// func Hello(ctx *fasthttp.RequestCtx, ps fasthttprouter.Params) {
-//     fmt.Fprintf(ctx, "hello, %s!\n", ps.ByName("name"))
+// func Hello(ctx *fasthttp.RequestCtx) {
+//     fmt.Fprintf(ctx, "hello, %s!\n", ctx.UserValue("name"))
 // }
 
 // func main() {
@@ -65,16 +65,11 @@
 //   /files/templates/article.html       match: filepath="/templates/article.html"
 //   /files                              no match, but the router would redirect
 //
-// The value of parameters is saved as a slice of the Param struct, consisting
-// each of a key and a value. The slice is passed to the Handle func as a third
-// parameter.
-// There are two ways to retrieve the value of a parameter:
-//  // by the name of the parameter
-//  user := ps.ByName("user") // defined by :user or *user
+// The value of parameters is inside ctx.UserValue
+// To retrieve the value of a parameter:
+//  // use the name of the parameter
+//  user := ps.UserValue("user")
 //
-//  // by the index of the parameter. This way you can also get the name (key)
-//  thirdKey   := ps[2].Key   // the name of the 3rd parameter
-//  thirdValue := ps[2].Value // the value of the 3rd parameter
 
 package fasthttprouter
 

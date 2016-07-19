@@ -792,7 +792,7 @@ func TestRouterLookup(t *testing.T) {
 			t.Fatal("Routing failed!")
 		}
 	}
-	if ctx.UserValue("user") != "gopher" {
+	if ctx.UserValue("name") != "gopher" {
 		t.Error("Param not set!")
 	}
 
