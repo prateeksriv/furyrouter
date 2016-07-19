@@ -25,10 +25,10 @@ func TestRouter(t *testing.T) {
 	routed := false
 	router.Handle("GET", "/user/:name", func(ctx *fasthttp.RequestCtx) {
 		routed = true
-		want := string{"name", "gopher"}
+		want := map[string]string{"name": "gopher"}
 
-		if !ctx.UserValue(want[0]) == want[1] {
-			t.Fatalf("wrong wildcard values: want %v, got %v", want[0], want[1])
+		if !(ctx.UserValue("name") == want["name"]) {
+			t.Fatalf("wrong wildcard values: want %v, got %v", want["name"], ctx.UserValue("name"))
 		}
 		ctx.Success("foo/bar", []byte("success"))
 	})
@@ -769,9 +769,10 @@ func TestRouterLookup(t *testing.T) {
 	}
 
 	router := New()
+	ctx := &fasthttp.RequestCtx{}
 
 	// try empty router first
-	handle, tsr := router.Lookup("GET", "/nope")
+	handle, tsr := router.Lookup("GET", "/nope", ctx)
 	if handle != nil {
 		t.Fatalf("Got handle for unregistered pattern: %v", handle)
 	}
@@ -782,17 +783,20 @@ func TestRouterLookup(t *testing.T) {
 	// insert route and try again
 	router.GET("/user/:name", wantHandle)
 
-	handle, tsr = router.Lookup("GET", "/user/gopher")
+	handle, tsr = router.Lookup("GET", "/user/gopher", ctx)
 	if handle == nil {
 		t.Fatal("Got no handle!")
 	} else {
-		handle(nil, nil)
+		handle(nil)
 		if !routed {
 			t.Fatal("Routing failed!")
 		}
 	}
+	if ctx.UserValue("user") != "gopher" {
+		t.Error("Param not set!")
+	}
 
-	handle, tsr = router.Lookup("GET", "/user/gopher/")
+	handle, tsr = router.Lookup("GET", "/user/gopher/", ctx)
 	if handle != nil {
 		t.Fatalf("Got handle for unregistered pattern: %v", handle)
 	}
@@ -800,7 +804,7 @@ func TestRouterLookup(t *testing.T) {
 		t.Error("Got no TSR recommendation!")
 	}
 
-	handle, tsr = router.Lookup("GET", "/nope")
+	handle, tsr = router.Lookup("GET", "/nope", ctx)
 	if handle != nil {
 		t.Fatalf("Got handle for unregistered pattern: %v", handle)
 	}

@@ -246,11 +246,11 @@ func (r *Router) recv(ctx *fasthttp.RequestCtx) {
 // If the path was found, it returns the handle function and the path parameter
 // values. Otherwise the third return value indicates whether a redirection to
 // the same path with an extra / without the trailing slash should be performed.
-func (r *Router) Lookup(method, path string) (fasthttp.RequestHandler, bool) {
+func (r *Router) Lookup(method, path string, ctx *fasthttp.RequestCtx) (fasthttp.RequestHandler, bool) {
 	if root := r.trees[method]; root != nil {
-		return root.getValue(path, nil)
+		return root.getValue(path, ctx)
 	}
-	return nil, nil, false
+	return nil, false
 }
 
 func (r *Router) allowed(path, reqMethod string) (allow string) {
