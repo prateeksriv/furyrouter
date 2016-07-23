@@ -1,26 +1,19 @@
-# FastHttpRouter
-[![Build Status](https://travis-ci.org/buaazp/fasthttprouter.png?branch=master)](https://travis-ci.org/buaazp/fasthttprouter)
-[![Coverage Status](https://coveralls.io/repos/buaazp/fasthttprouter/badge.svg?branch=master&service=github)](https://coveralls.io/github/buaazp/fasthttprouter?branch=master)
-[![GoDoc](http://godoc.org/github.com/buaazp/fasthttprouter?status.png)](http://godoc.org/github.com/buaazp/fasthttprouter)
+# FuryRouter
 
-FastHttpRouter is forked from [httprouter](https://github.com/julienschmidt/httprouter) which is a lightweight high performance HTTP request router
-(also called *multiplexer* or just *mux* for short) for [fasthttp](https://github.com/valyala/fasthttp).
+FuryRouter is forked from [fasthttprouter]() which in turn is forked from [httprouter](https://github.com/julienschmidt/httprouter) which is a lightweight high performance HTTP request router
+(also called *multiplexer* or just *mux* for short).
 
-In addition to the [RequestHandler](https://godoc.org/github.com/valyala/fasthttp#RequestHandler) functions of valyala's `fasthttp` package, this router supports fetching `param` variables into `RequestCtx.UserVales` and matching against the request method. It also scales better.
+This library is leverage [fasthttp](https://github.com/valyala/fasthttp) and [RequestHandler](https://godoc.org/github.com/valyala/fasthttp#RequestHandler) functions. It supports method matching and
+fetches parameters into `RequestHandler.UserValues`.
 
 The router is optimized for high performance and a small memory footprint. It scales well even with very long paths and a large number of routes. A compressing dynamic trie (radix tree) structure is used for efficient matching.
 
+## Enhancements
+
+- No more memory allocation for extra `params` variable. Uses built in `UserValue` from `RequestHandler` instead.
+- Easier middleware chaining as a result of no extra `params` variable being passed. Using chaining library such as [fasthttpchain](https://github.com/gofury/fasthttpchain)
+
 ## Features
-
-**Best Performance:** FastHttpRouter is the **fastest** go web framework in the [go-web-framework-benchmark](https://github.com/smallnest/go-web-framework-benchmark). Even faster than httprouter itself.
-
-- Basic Test: The first test case is to mock 0 ms, 10 ms, 100 ms, 500 ms processing time in handlers. The concurrency clients are 5000.
-
-![](http://ww3.sinaimg.cn/large/4c422e03jw1f2p6nyqh9ij20mm0aktbj.jpg)
-
-- Concurrency Test: In 30 ms processing time, the tets result for 100, 1000, 5000 clients is:
-
-![](http://ww4.sinaimg.cn/large/4c422e03jw1f2p6o1cdbij20lk09sack.jpg)
 
 See below for technical details of the implementation.
 

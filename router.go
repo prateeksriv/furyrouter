@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-// Package fasthttprouter is a trie based high performance HTTP request router.
+// package furyrouter is a trie based high performance HTTP request router.
 //
 // A trivial example is:
 //
@@ -71,7 +71,7 @@
 //  user := ps.UserValue("user")
 //
 
-package fasthttprouter
+package furyrouter
 
 import (
 	"strings"
@@ -293,7 +293,7 @@ func (r *Router) Handler(ctx *fasthttp.RequestCtx) {
 	}
 
 	path := string(ctx.Path())
-	method := string(ctx.Method())
+	method := string(ctx.Method()) // TODO make method compare bytes instead of string
 	if root := r.trees[method]; root != nil {
 		if f, tsr := root.getValue(path, ctx); f != nil {
 			f(ctx)
