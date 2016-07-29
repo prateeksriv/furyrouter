@@ -1,4 +1,9 @@
-// Copyright 2013 Julien Schmidt. All rights reserved.
+// Copyright for portions of project "furyrouter" are held by
+// Julien Schmidt 2013 as part of project "httprouter" and
+// 招牌疯子, 2015 as part of project "fasthttprouter"
+
+// All other copyright for project "furyrouter" are held by Little Bay Digital, 2016.
+
 // Based on the path package, Copyright 2009 The Go Authors.
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.

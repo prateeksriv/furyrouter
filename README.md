@@ -1,17 +1,24 @@
 # FuryRouter
 
-FuryRouter is forked from [fasthttprouter]() which in turn is forked from [httprouter](https://github.com/julienschmidt/httprouter) which is a lightweight high performance HTTP request router
-(also called *multiplexer* or just *mux* for short).
+[![Coverage Status](https://coveralls.io/repos/gofury/furyrouter/badge.svg?branch=master&service=github)](https://coveralls.io/github/gofury/furyrouter?branch=master)
+[![GoDoc](http://godoc.org/github.com/gofury/furyrouter?status.png)](http://godoc.org/github.com/gofury/furyrouter)
 
-This library is leverage [fasthttp](https://github.com/valyala/fasthttp) and [RequestHandler](https://godoc.org/github.com/valyala/fasthttp#RequestHandler) functions. It supports method matching and
+FuryRouter is forked from [fasthttprouter][fasthttprouter] which in turn is forked from [httprouter][httprouter].
+It leverages [fasthttp][fasthttp] and [fasthttp.RequestHandler][fasthttp.RequestHandler] functions and 
 fetches parameters into `RequestHandler.UserValues`.
-
-The router is optimized for high performance and a small memory footprint. It scales well even with very long paths and a large number of routes. A compressing dynamic trie (radix tree) structure is used for efficient matching.
 
 ## Enhancements
 
-- No more memory allocation for extra `params` variable. Uses built in `UserValue` from `RequestHandler` instead.
-- Easier middleware chaining as a result of no extra `params` variable being passed. Using chaining library such as [fasthttpchain](https://github.com/gofury/fasthttpchain)
+Both `fasthttprouter` and `httprouter` are highly optimised with low memory footprint. However they still suffer from 
+having to allocate memory for `params`. Which also takes up an extra argument, causing the `Router.Handler` to be 
+non-compatible when chaining other middleware. Eg:
+
+`func Handler(ctx *fasthttp.RequestCtx, ps fasthttprouter.Params)` is not chainable with `func Middleware(ctx *fasthttp.RequestCtx)`
+
+FuryRouter attempts to improve on this by:
+
+- Getting rid of the extra `params` variable. Uses built in `UserValue` from `RequestHandler` instead.
+- Easier middleware chaining as a result of no extra `params` variable being passed. Using chaining library such as [fasthttpchain][fasthttpchain]
 
 ## Features
 
@@ -31,41 +38,15 @@ The router is optimized for high performance and a small memory footprint. It sc
 
 **Perfect for APIs:** The router design encourages to build sensible, hierarchical RESTful APIs. Moreover it has builtin native support for [OPTIONS requests](http://zacstewart.com/2012/04/14/http-options-method.html) and `405 Method Not Allowed` replies.
 
-Of course you can also set **custom [NotFound](http://godoc.org/github.com/buaazp/fasthttprouter#Router.NotFound) and  [MethodNotAllowed](http://godoc.org/github.com/buaazp/fasthttprouter#Router.MethodNotAllowed) handlers** and [**serve static files**](http://godoc.org/github.com/buaazp/fasthttprouter#Router.ServeFiles).
+Of course you can also set **custom [`NotFound`][Router.NotFound] and  [`MethodNotAllowed`][Router.HandleMethodNotAllowed] handlers** and [**serve static files**][Router.ServeFiles].
 
 ## Usage
 
-This is just a quick introduction, view the [GoDoc](http://godoc.org/github.com/buaazp/fasthttprouter) for details.
+This is just a quick introduction, view the [GoDoc](http://godoc.org/github.com/gofury/furyrouter) for details.
 
 Let's start with a trivial example:
 
-```go
-package main
-
-import (
-	"fmt"
-	"log"
-
-	"github.com/buaazp/fasthttprouter"
-	"github.com/valyala/fasthttp"
-)
-
-func Index(ctx *fasthttp.RequestCtx) {
-	fmt.Fprint(ctx, "Welcome!\n")
-}
-
-func Hello(ctx *fasthttp.RequestCtx) {
-	fmt.Fprintf(ctx, "hello, %s!\n", ctx.UserValue("name"))
-}
-
-func main() {
-	router := fasthttprouter.New()
-	router.GET("/", Index)
-	router.GET("/hello/:name", Hello)
-
-	log.Fatal(fasthttp.ListenAndServe(":8080", router.Handler))
-}
-```
+[examples/basic.go][examples.basic]
 
 ### Named parameters
 
@@ -135,15 +116,15 @@ For even better scalability, the child nodes on each tree level are ordered by p
 
 ## Why doesn't this work with `http.Handler`?
 
-Becasue fasthttp doesn't provide http.Handler. See this [description](https://github.com/valyala/fasthttp#switching-from-nethttp-to-fasthttp).
+Becasue fasthttp doesn't use http.Handler. See this [description][fasthttp.switch].
 
-Fasthttp works with [RequestHandler](https://godoc.org/github.com/valyala/fasthttp#RequestHandler) functions instead of objects implementing Handler interface. So a FastHttpRouter provides a [Handler](https://godoc.org/github.com/buaazp/fasthttprouter#Router.Handler) interface to implement the fasthttp.ListenAndServe interface.
+Fasthttp works with [RequestHandler][fasthttp.RequestHandler] functions instead of objects implementing Handler interface. So a FastHttpRouter provides a [Handler][Router.Handler] interface to implement the `fasthttp.ListenAndServe` interface.
 
 Just try it out for yourself, the usage of FastHttpRouter is very straightforward. The package is compact and minimalistic, but also probably one of the easiest routers to set up.
 
 ## Where can I find Middleware *X*?
 
-This package just provides a very efficient request router with a few extra features. The router is just a [`fasthttp.RequestHandler`](https://godoc.org/github.com/valyala/fasthttp#RequestHandler), you can chain any fasthttp.RequestHandler compatible middleware before the router. Or you could [just write your own](https://justinas.org/writing-http-middleware-in-go/), it's very easy!
+This package just provides a very efficient request router with a few extra features. The router is just a [`fasthttp.RequestHandler`][fasthttp.RequestHandler], you can chain any fasthttp.RequestHandler compatible middleware before the router. Or you could [just write your own](https://justinas.org/writing-http-middleware-in-go/), it's very easy!
 
 Alternatively, you could try a web framework based on FastHttpRouter - Coming soon.
 
@@ -153,108 +134,19 @@ Here is a quick example: Does your server serve multiple domains / hosts?
 You want to use sub-domains?
 Define a router per host!
 
-```go
-// We need an object that implements the fasthttp.RequestHandler interface.
-// We just use a map here, in which we map host names (with port) to fasthttp.RequestHandlers
-type HostSwitch map[string]fasthttp.RequestHandler
-
-// Implement a CheckHost method on our new type
-func (hs HostSwitch) CheckHost(ctx *fasthttp.RequestCtx) {
-	// Check if a http.Handler is registered for the given host.
-	// If yes, use it to handle the request.
-	if handler := hs[string(ctx.Host())]; handler != nil {
-		handler(ctx)
-	} else {
-		// Handle host names for wich no handler is registered
-		ctx.Error("Forbidden", 403) // Or Redirect?
-	}
-}
-
-func main() {
-	// Initialize a router as usual
-	router := fasthttprouter.New()
-	router.GET("/", Index)
-	router.GET("/hello/:name", Hello)
-
-	// Make a new HostSwitch and insert the router (our http handler)
-	// for example.com and port 12345
-	hs := make(HostSwitch)
-	hs["example.com:12345"] = router.Handler
-
-	// Use the HostSwitch to listen and serve on port 12345
-	log.Fatal(fasthttp.ListenAndServe(":12345", hs.CheckHost))
-}
-```
+[examples/hosts.go][examples.hosts]
 
 ### Basic Authentication
 
-Another quick example: Basic Authentication (RFC 2617) for handles:
+Another quick example: Basic Authentication (RFC 2617) for handles
 
-```go
-package main
-
-import (
-	"bytes"
-	"encoding/base64"
-	"fmt"
-	"log"
-
-	"github.com/buaazp/fasthttprouter"
-	"github.com/valyala/fasthttp"
-)
-
-var basicAuthPrefix = []byte("Basic ")
-
-func BasicAuth(h fasthttprouter.Handle, user, pass []byte) fasthttprouter.Handle {
-	return fasthttprouter.Handle(func(ctx *fasthttp.RequestCtx) {
-		// Get the Basic Authentication credentials
-		auth := ctx.Request.Header.Peek("Authorization")
-		if bytes.HasPrefix(auth, basicAuthPrefix) {
-			// Check credentials
-			payload, err := base64.StdEncoding.DecodeString(string(auth[len(basicAuthPrefix):]))
-			if err == nil {
-				pair := bytes.SplitN(payload, []byte(":"), 2)
-				if len(pair) == 2 &&
-					bytes.Equal(pair[0], user) &&
-					bytes.Equal(pair[1], pass) {
-					// Delegate request to the given handle
-					h(ctx)
-					return
-				}
-			}
-		}
-
-		// Request Basic Authentication otherwise
-		ctx.Response.Header.Set("WWW-Authenticate", "Basic realm=Restricted")
-		ctx.Error(fasthttp.StatusMessage(fasthttp.StatusUnauthorized), fasthttp.StatusUnauthorized)
-	})
-}
-
-func Index(ctx *fasthttp.RequestCtx) {
-	fmt.Fprint(ctx, "Not protected!\n")
-}
-
-func Protected(ctx *fasthttp.RequestCtx) {
-	fmt.Fprint(ctx, "Protected!\n")
-}
-
-func main() {
-	user := []byte("gordon")
-	pass := []byte("secret!")
-
-	router := fasthttprouter.New()
-	router.GET("/", Index)
-	router.GET("/protected/", BasicAuth(Protected, user, pass))
-
-	log.Fatal(fasthttp.ListenAndServe(":8080", router.Handler))
-}
-```
+[examples/auth.go][examples.auth]
 
 ## Chaining with the NotFound handler
 
-**NOTE: It might be required to set [Router.HandleMethodNotAllowed](http://godoc.org/github.com/buaazp/fasthttprouter#Router.HandleMethodNotAllowed) to `false` to avoid problems.**
+**NOTE: It might be required to set [`Router.HandleMethodNotAllowed`][Router.HandleMethodNotAllowed] to `false` to avoid problems.**
 
-You can use another [http.Handler](http://golang.org/pkg/net/http/#Handler), for example another router, to handle requests which could not be matched by this router by using the [Router.NotFound](http://godoc.org/github.com/buaazp/fasthttprouter#Router.NotFound) handler. This allows chaining.
+You can use another [`fasthttp.RequestHandler`][fasthttp.RequestHandler], for example another router, to handle requests which could not be matched by this router by using the [`Router.NotFound`][Router.NotFound] handler. This allows chaining.
 
 ### Static files
 The `NotFound` handler can for example be used to serve static files from the root path `/` (like an index.html file along with other assets):
@@ -266,32 +158,23 @@ router.NotFound = fasthttp.FSHandler("./public", 0)
 
 But this approach sidesteps the strict core rules of this router to avoid routing problems. A cleaner approach is to use a distinct sub-path for serving files, like `/static/*filepath` or `/files/*filepath`.
 
-## Web Frameworks based on FastHttpRouter
+## Web Frameworks based on FuryRouter
 
-If the HttpRouter is a bit too minimalistic for you, you might try one of the following more high-level 3rd-party web frameworks building upon the HttpRouter package:
-
-* [Ace](https://github.com/plimble/ace): Blazing fast Go Web Framework
-* [api2go](https://github.com/manyminds/api2go): A JSON API Implementation for Go
-* [Gin](https://github.com/gin-gonic/gin): Features a martini-like API with much better performance
-* [Goat](https://github.com/bahlo/goat): A minimalistic REST API server in Go
-* [Hikaru](https://github.com/najeira/hikaru): Supports standalone and Google AppEngine
-* [Hitch](https://github.com/nbio/hitch): Hitch ties httprouter, [httpcontext](https://github.com/nbio/httpcontext), and middleware up in a bow
-* [httpway](https://github.com/corneldamian/httpway): Simple middleware extension with context for httprouter and a server with gracefully shutdown support
-* [kami](https://github.com/guregu/kami): A tiny web framework using x/net/context
-* [Medeina](https://github.com/imdario/medeina): Inspired by Ruby's Roda and Cuba
-* [Neko](https://github.com/rocwong/neko): A lightweight web application framework for Golang
-* [River](https://github.com/abiosoft/river): River is a simple and lightweight REST server
-* [Roxanna](https://github.com/iamthemuffinman/Roxanna): An amalgamation of httprouter, better logging, and hot reload
-* [siesta](https://github.com/VividCortex/siesta): Composable HTTP handlers with contexts
-* [xmux](https://github.com/rs/xmux): xmux is a httprouter fork on top of xhandler (net/context aware)
+You might try one of the following more high-level 3rd-party web frameworks building upon the FuryRouter package:
 
 [benchmark]: <https://github.com/julienschmidt/go-http-routing-benchmark>
-[http.Handler]: <https://golang.org/pkg/net/http/#Handler
+[fasthttp]: <https://godoc.org/github.com/valyala/fasthttp>
+[fasthttp.switch]: <https://github.com/valyala/fasthttp#switching-from-nethttp-to-fasthttp>
+[fasthttp.RequestHandler]: <https://godoc.org/github.com/valyala/fasthttp#RequestHandler>
 [http.ServeMux]: <https://golang.org/pkg/net/http/#ServeMux>
-[Router.Handle]: <https://godoc.org/github.com/julienschmidt/httprouter#Router.Handle>
-[Router.HandleMethodNotAllowed]: <https://godoc.org/github.com/julienschmidt/httprouter#Router.HandleMethodNotAllowed>
-[Router.Handler]: <https://godoc.org/github.com/julienschmidt/httprouter#Router.Handler>
-[Router.HandlerFunc]: <https://godoc.org/github.com/julienschmidt/httprouter#Router.HandlerFunc>
-[Router.NotFound]: <https://godoc.org/github.com/julienschmidt/httprouter#Router.NotFound>
-[Router.PanicHandler]: <https://godoc.org/github.com/julienschmidt/httprouter#Router.PanicHandler>
-[Router.ServeFiles]: <https://godoc.org/github.com/julienschmidt/httprouter#Router.ServeFiles>
+[Router.Handle]: <https://godoc.org/github.com/gofury/furyrouter#Router.Handle>
+[Router.HandleMethodNotAllowed]: <https://godoc.org/github.com/gofury/furyrouter#Router.HandleMethodNotAllowed>
+[Router.Handler]: <https://godoc.org/github.com/gofury/furyrouter#Router.Handler>
+[Router.NotFound]: <https://godoc.org/github.com/gofury/furyrouter#Router.NotFound>
+[Router.PanicHandler]: <https://godoc.org/github.com/gofury/furyrouter#Router.PanicHandler>
+[Router.ServeFiles]: <https://godoc.org/github.com/gofury/furyrouter#Router.ServeFiles>
+[fasthttprouter]: <https://github.com/buaazp/fasthttprouter>
+[fasthttpchain]: <https://github.com/gofury/fasthttpchain>
+[examples.basic]: <https://github.com/gofury/furyrouter/blob/master/examples/basic.go>
+[examples.auth]: <https://github.com/gofury/furyrouter/blob/master/examples/auth.go>
+[examples.hosts]: <https://github.com/gofury/furyrouter/blob/master/examples/hosts.go>

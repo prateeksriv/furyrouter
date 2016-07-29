@@ -1,4 +1,9 @@
-// Copyright 2013 Julien Schmidt. All rights reserved.
+// Copyright for portions of project "furyrouter" are held by
+// Julien Schmidt 2013 as part of project "httprouter" and
+// 招牌疯子, 2015 as part of project "fasthttprouter"
+
+// All other copyright for project "furyrouter" are held by Little Bay Digital, 2016.
+
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
@@ -12,7 +17,7 @@
 //     "fmt"
 //     "log"
 //
-//     "github.com/buaazp/fasthttprouter"
+//     "github.com/gofury/furyrouter"
 //     "github.com/valyala/fasthttp"
 // )
 
@@ -83,7 +88,7 @@ var (
 	defaultContentType = []byte("text/plain; charset=utf-8")
 )
 
-// Router is a http.Handler which can be used to dispatch requests to different
+// Router is a fasthttp.RequestHandler which can be used to dispatch requests to different
 // handler functions via configurable routes
 type Router struct {
 	trees map[string]*node
@@ -118,11 +123,11 @@ type Router struct {
 	// Custom OPTIONS handlers take priority over automatic replies.
 	HandleOPTIONS bool
 
-	// Configurable http.Handler which is called when no matching route is
+	// Configurable fasthttp.RequestHandler which is called when no matching route is
 	// found. If it is not set, http.NotFound is used.
 	NotFound fasthttp.RequestHandler
 
-	// Configurable http.Handler which is called when a request
+	// Configurable fasthttp.RequestHandler which is called when a request
 	// cannot be routed and HandleMethodNotAllowed is true.
 	// If it is not set, http.Error with http.StatusMethodNotAllowed is used.
 	// The "Allow" header with allowed request methods is set before the handler
