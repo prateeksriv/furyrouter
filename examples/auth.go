@@ -6,15 +6,14 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
+	"github.com/gofury/furyrouter"
 )
 
 var basicAuthPrefix = []byte("Basic ")
 
-// BasicAuth is the basic auth handler
-func BasicAuth(h fasthttprouter.Handle, user, pass []byte) fasthttprouter.Handle {
-	return fasthttprouter.Handle(func(ctx *fasthttp.RequestCtx) {
+func BasicAuth(h fasthttp.RequestHandler, user, pass []byte) fasthttp.RequestHandler {
+	return func(ctx *fasthttp.RequestCtx) {
 		// Get the Basic Authentication credentials
 		auth := ctx.Request.Header.Peek("Authorization")
 		if bytes.HasPrefix(auth, basicAuthPrefix) {
@@ -35,15 +34,13 @@ func BasicAuth(h fasthttprouter.Handle, user, pass []byte) fasthttprouter.Handle
 		// Request Basic Authentication otherwise
 		ctx.Response.Header.Set("WWW-Authenticate", "Basic realm=Restricted")
 		ctx.Error(fasthttp.StatusMessage(fasthttp.StatusUnauthorized), fasthttp.StatusUnauthorized)
-	})
+	}
 }
 
-// Index is the index handler
-func Index(ctx *fasthttp.RequestCtx) {
+func NotProtected(ctx *fasthttp.RequestCtx) {
 	fmt.Fprint(ctx, "Not protected!\n")
 }
 
-// Protected is the Protected handler
 func Protected(ctx *fasthttp.RequestCtx) {
 	fmt.Fprint(ctx, "Protected!\n")
 }
@@ -52,8 +49,8 @@ func main() {
 	user := []byte("gordon")
 	pass := []byte("secret!")
 
-	router := fasthttprouter.New()
-	router.GET("/", Index)
+	router := furyrouter.New()
+	router.GET("/", NotProtected)
 	router.GET("/protected/", BasicAuth(Protected, user, pass))
 
 	log.Fatal(fasthttp.ListenAndServe(":8080", router.Handler))

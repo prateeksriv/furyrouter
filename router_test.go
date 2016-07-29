@@ -7,11 +7,9 @@ package furyrouter
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
-	"net/http"
 	"os"
 	"testing"
 	"time"
@@ -51,20 +49,12 @@ func TestRouter(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 
 	if !routed {
 		t.Fatal("routing failed")
 	}
-}
-
-type handlerStruct struct {
-	handeled *bool
-}
-
-func (h handlerStruct) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	*h.handeled = true
 }
 
 func TestRouterAPI(t *testing.T) {
@@ -110,7 +100,7 @@ func TestRouterAPI(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if !get {
 		t.Error("routing GET failed")
@@ -126,7 +116,7 @@ func TestRouterAPI(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if !head {
 		t.Error("routing HEAD failed")
@@ -142,7 +132,7 @@ func TestRouterAPI(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if !options {
 		t.Error("routing OPTIONS failed")
@@ -158,7 +148,7 @@ func TestRouterAPI(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if !post {
 		t.Error("routing POST failed")
@@ -174,7 +164,7 @@ func TestRouterAPI(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if !put {
 		t.Error("routing PUT failed")
@@ -190,7 +180,7 @@ func TestRouterAPI(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if !patch {
 		t.Error("routing PATCH failed")
@@ -206,7 +196,7 @@ func TestRouterAPI(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if !deleted {
 		t.Error("routing DELETE failed")
@@ -257,7 +247,7 @@ func TestRouterChaining(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	br := bufio.NewReader(&rw.w)
 	var resp fasthttp.Response
@@ -265,7 +255,7 @@ func TestRouterChaining(t *testing.T) {
 		t.Fatalf("Unexpected error when reading response: %s", err)
 	}
 	if !(resp.Header.StatusCode() == fasthttp.StatusOK && fooHit) {
-		t.Errorf("Regular routing failed with router chaining.")
+		t.Error("Regular routing failed with router chaining.")
 		t.FailNow()
 	}
 
@@ -279,13 +269,13 @@ func TestRouterChaining(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if err := resp.Read(br); err != nil {
 		t.Fatalf("Unexpected error when reading response: %s", err)
 	}
 	if !(resp.Header.StatusCode() == fasthttp.StatusOK && barHit) {
-		t.Errorf("Chained routing failed with router chaining.")
+		t.Error("Chained routing failed with router chaining.")
 		t.FailNow()
 	}
 
@@ -299,13 +289,13 @@ func TestRouterChaining(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if err := resp.Read(br); err != nil {
 		t.Fatalf("Unexpected error when reading response: %s", err)
 	}
 	if !(resp.Header.StatusCode() == fasthttp.StatusNotFound) {
-		t.Errorf("NotFound behavior failed with router chaining.")
+		t.Error("NotFound behavior failed with router chaining.")
 		t.FailNow()
 	}
 }
@@ -337,7 +327,7 @@ func TestRouterOPTIONS(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	br := bufio.NewReader(&rw.w)
 	var resp fasthttp.Response
@@ -362,7 +352,7 @@ func TestRouterOPTIONS(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if err := resp.Read(br); err != nil {
 		t.Fatalf("Unexpected error when reading response: %s", err)
@@ -384,7 +374,7 @@ func TestRouterOPTIONS(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if err := resp.Read(br); err != nil {
 		t.Fatalf("Unexpected error when reading response: %s", err)
@@ -409,7 +399,7 @@ func TestRouterOPTIONS(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if err := resp.Read(br); err != nil {
 		t.Fatalf("Unexpected error when reading response: %s", err)
@@ -432,7 +422,7 @@ func TestRouterOPTIONS(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if err := resp.Read(br); err != nil {
 		t.Fatalf("Unexpected error when reading response: %s", err)
@@ -462,7 +452,7 @@ func TestRouterOPTIONS(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if err := resp.Read(br); err != nil {
 		t.Fatalf("Unexpected error when reading response: %s", err)
@@ -488,7 +478,7 @@ func TestRouterOPTIONS(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if err := resp.Read(br); err != nil {
 		t.Fatalf("Unexpected error when reading response: %s", err)
@@ -526,7 +516,7 @@ func TestRouterNotAllowed(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	br := bufio.NewReader(&rw.w)
 	var resp fasthttp.Response
@@ -554,7 +544,7 @@ func TestRouterNotAllowed(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if err := resp.Read(br); err != nil {
 		t.Fatalf("Unexpected error when reading response: %s", err)
@@ -580,7 +570,7 @@ func TestRouterNotAllowed(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if err := resp.Read(br); err != nil {
 		t.Fatalf("Unexpected error when reading response: %s", err)
@@ -638,7 +628,7 @@ func TestRouterNotFound(t *testing.T) {
 				t.Fatalf("return error %s", err)
 			}
 		case <-time.After(100 * time.Millisecond):
-			t.Fatalf("timeout")
+			t.Fatal("timeout")
 		}
 		if err := resp.Read(br); err != nil {
 			t.Fatalf("Unexpected error when reading response: %s", err)
@@ -665,7 +655,7 @@ func TestRouterNotFound(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if err := resp.Read(br); err != nil {
 		t.Fatalf("Unexpected error when reading response: %s", err)
@@ -686,7 +676,7 @@ func TestRouterNotFound(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if err := resp.Read(br); err != nil {
 		t.Fatalf("Unexpected error when reading response: %s", err)
@@ -709,7 +699,7 @@ func TestRouterNotFound(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 	if err := resp.Read(br); err != nil {
 		t.Fatalf("Unexpected error when reading response: %s", err)
@@ -754,7 +744,7 @@ func TestRouterPanicHandler(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 
 	if !panicHandled {
@@ -817,11 +807,6 @@ type mockFileSystem struct {
 	opened bool
 }
 
-func (mfs *mockFileSystem) Open(name string) (http.File, error) {
-	mfs.opened = true
-	return nil, errors.New("this is just a mock")
-}
-
 func TestRouterServeFiles(t *testing.T) {
 	router := New()
 
@@ -853,7 +838,7 @@ func TestRouterServeFiles(t *testing.T) {
 			t.Fatalf("return error %s", err)
 		}
 	case <-time.After(500 * time.Millisecond):
-		t.Fatalf("timeout")
+		t.Fatal("timeout")
 	}
 
 	br := bufio.NewReader(&rw.w)

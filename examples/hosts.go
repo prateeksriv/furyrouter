@@ -4,18 +4,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
+	"github.com/gofury/furyrouter"
 )
 
-// Index is the index handler
-func Index(ctx *fasthttp.RequestCtx) {
-	fmt.Fprint(ctx, "Welcome!\n")
-}
-
-// Hello is the Hello handler
-func Hello(ctx *fasthttp.RequestCtx) {
-	fmt.Fprintf(ctx, "hello, %s!\n", ctx.UserValue("name"))
+func Host(ctx *fasthttp.RequestCtx) {
+	fmt.Fprintf(ctx, "host: %s!\n", ctx.UserValue("name"))
 }
 
 // HostSwitch is the host-handler map
@@ -37,9 +31,8 @@ func (hs HostSwitch) CheckHost(ctx *fasthttp.RequestCtx) {
 
 func main() {
 	// Initialize a router as usual
-	router := fasthttprouter.New()
-	router.GET("/", Index)
-	router.GET("/hello/:name", Hello)
+	router := furyrouter.New()
+	router.GET("/hosts/:name", Host)
 
 	// Make a new HostSwitch and insert the router (our http handler)
 	// for example.com and port 12345
