@@ -15,43 +15,21 @@ The router is optimized for high performance and a small memory footprint. It sc
 
 ## Features
 
-See below for technical details of the implementation.
+**Only explicit matches:** With other routers, like [`http.ServeMux`][http.ServeMux], a requested URL path could match multiple patterns. Therefore they have some awkward pattern priority rules, like *longest match* or *first registered, first matched*. By design of this router, a request can only match exactly one or no route. As a result, there are also no unintended matches, which makes it great for SEO and improves the user experience.
 
-**Only explicit matches:** With other routers, like [http.ServeMux](http://golang.org/pkg/net/http/#ServeMux),
-a requested URL path could match multiple patterns. Therefore they have some
-awkward pattern priority rules, like *longest match* or *first registered,
-first matched*. By design of this router, a request can only match exactly one
-or no route. As a result, there are also no unintended matches, which makes it
-great for SEO and improves the user experience.
+**Stop caring about trailing slashes:** Choose the URL style you like, the router automatically redirects the client if a trailing slash is missing or if there is one extra. Of course it only does so, if the new path has a handler. If you don't like it, you can [turn off this behavior](https://godoc.org/github.com/julienschmidt/httprouter#Router.RedirectTrailingSlash).
 
-**Stop caring about trailing slashes:** Choose the URL style you like, the
-router automatically redirects the client if a trailing slash is missing or if
-there is one extra. Of course it only does so, if the new path has a handler.
-If you don't like it, you can [turn off this behavior](http://godoc.org/github.com/buaazp/fasthttprouter#Router.RedirectTrailingSlash).
+**Path auto-correction:** Besides detecting the missing or additional trailing slash at no extra cost, the router can also fix wrong cases and remove superfluous path elements (like `../` or `//`). Is [CAPTAIN CAPS LOCK](http://www.urbandictionary.com/define.php?term=Captain+Caps+Lock) one of your users? HttpRouter can help him by making a case-insensitive look-up and redirecting him to the correct URL.
 
-**Path auto-correction:** Besides detecting the missing or additional trailing
-slash at no extra cost, the router can also fix wrong cases and remove
-superfluous path elements (like `../` or `//`).
-Is [CAPTAIN CAPS LOCK](http://www.urbandictionary.com/define.php?term=Captain+Caps+Lock) one of your users?
-FastHttpRouter can help him by making a case-insensitive look-up and redirecting him
-to the correct URL.
+**Parameters in your routing pattern:** Stop parsing the requested URL path, just give the path segment a name and the router delivers the dynamic value to you. Because of the design of the router, path parameters are very cheap.
 
-**Parameters in your routing pattern:** Stop parsing the requested URL path,
-just give the path segment a name and the router delivers the dynamic value to
-you. Because of the design of the router, path parameters are very cheap.
+**Zero Garbage:** The matching and dispatching process generates zero bytes of garbage. In fact, the only heap allocations that are made, is by building the slice of the key-value pairs for path parameters. If the request path contains no parameters, not a single heap allocation is necessary.
 
-**Zero Garbage:** The matching and dispatching process generates zero bytes of
-garbage. In fact, the only heap allocations that are made, is by building the
-slice of the key-value pairs for path parameters. If the request path contains
-no parameters, not a single heap allocation is necessary.
+**Best Performance:** [Benchmarks speak for themselves][benchmark]. See below for technical details of the implementation.
 
-**No more server crashes:** You can set a [Panic handler](http://godoc.org/github.com/buaazp/fasthttprouter#Router.PanicHandler) to deal with panics
-occurring during handling a HTTP request. The router then recovers and lets the
-PanicHandler log what happened and deliver a nice error page.
+**No more server crashes:** You can set a [Panic handler][Router.PanicHandler] to deal with panics occurring during handling a HTTP request. The router then recovers and lets the `PanicHandler` log what happened and deliver a nice error page.
 
-**Perfect for APIs:** The router design encourages to build sensible, hierarchical
-RESTful APIs. Moreover it has builtin native support for [OPTIONS requests](http://zacstewart.com/2012/04/14/http-options-method.html)
-and `405 Method Not Allowed` replies.
+**Perfect for APIs:** The router design encourages to build sensible, hierarchical RESTful APIs. Moreover it has builtin native support for [OPTIONS requests](http://zacstewart.com/2012/04/14/http-options-method.html) and `405 Method Not Allowed` replies.
 
 Of course you can also set **custom [NotFound](http://godoc.org/github.com/buaazp/fasthttprouter#Router.NotFound) and  [MethodNotAllowed](http://godoc.org/github.com/buaazp/fasthttprouter#Router.MethodNotAllowed) handlers** and [**serve static files**](http://godoc.org/github.com/buaazp/fasthttprouter#Router.ServeFiles).
 
@@ -108,9 +86,7 @@ Pattern: /user/:user
 
 ### Catch-All parameters
 
-The second type are *catch-all* parameters and have the form `*name`.
-Like the name suggests, they match everything.
-Therefore they must always be at the **end** of the pattern:
+The second type are *catch-all* parameters and have the form `*name`. Like the name suggests, they match everything. Therefore they must always be at the **end** of the pattern:
 
 ```
 Pattern: /src/*filepath
@@ -294,4 +270,28 @@ But this approach sidesteps the strict core rules of this router to avoid routin
 
 If the HttpRouter is a bit too minimalistic for you, you might try one of the following more high-level 3rd-party web frameworks building upon the HttpRouter package:
 
-- Waiting for you to do this...
+* [Ace](https://github.com/plimble/ace): Blazing fast Go Web Framework
+* [api2go](https://github.com/manyminds/api2go): A JSON API Implementation for Go
+* [Gin](https://github.com/gin-gonic/gin): Features a martini-like API with much better performance
+* [Goat](https://github.com/bahlo/goat): A minimalistic REST API server in Go
+* [Hikaru](https://github.com/najeira/hikaru): Supports standalone and Google AppEngine
+* [Hitch](https://github.com/nbio/hitch): Hitch ties httprouter, [httpcontext](https://github.com/nbio/httpcontext), and middleware up in a bow
+* [httpway](https://github.com/corneldamian/httpway): Simple middleware extension with context for httprouter and a server with gracefully shutdown support
+* [kami](https://github.com/guregu/kami): A tiny web framework using x/net/context
+* [Medeina](https://github.com/imdario/medeina): Inspired by Ruby's Roda and Cuba
+* [Neko](https://github.com/rocwong/neko): A lightweight web application framework for Golang
+* [River](https://github.com/abiosoft/river): River is a simple and lightweight REST server
+* [Roxanna](https://github.com/iamthemuffinman/Roxanna): An amalgamation of httprouter, better logging, and hot reload
+* [siesta](https://github.com/VividCortex/siesta): Composable HTTP handlers with contexts
+* [xmux](https://github.com/rs/xmux): xmux is a httprouter fork on top of xhandler (net/context aware)
+
+[benchmark]: <https://github.com/julienschmidt/go-http-routing-benchmark>
+[http.Handler]: <https://golang.org/pkg/net/http/#Handler
+[http.ServeMux]: <https://golang.org/pkg/net/http/#ServeMux>
+[Router.Handle]: <https://godoc.org/github.com/julienschmidt/httprouter#Router.Handle>
+[Router.HandleMethodNotAllowed]: <https://godoc.org/github.com/julienschmidt/httprouter#Router.HandleMethodNotAllowed>
+[Router.Handler]: <https://godoc.org/github.com/julienschmidt/httprouter#Router.Handler>
+[Router.HandlerFunc]: <https://godoc.org/github.com/julienschmidt/httprouter#Router.HandlerFunc>
+[Router.NotFound]: <https://godoc.org/github.com/julienschmidt/httprouter#Router.NotFound>
+[Router.PanicHandler]: <https://godoc.org/github.com/julienschmidt/httprouter#Router.PanicHandler>
+[Router.ServeFiles]: <https://godoc.org/github.com/julienschmidt/httprouter#Router.ServeFiles>
