@@ -1,5 +1,6 @@
 # FuryRouter
 
+[![Build Status](https://snap-ci.com/gofury/furyrouter/branch/master/build_image)](https://snap-ci.com/gofury/furyrouter/branch/master)
 [![Coverage Status](https://coveralls.io/repos/gofury/furyrouter/badge.svg?branch=master&service=github)](https://coveralls.io/github/gofury/furyrouter?branch=master)
 [![GoDoc](http://godoc.org/github.com/gofury/furyrouter?status.png)](http://godoc.org/github.com/gofury/furyrouter)
 
@@ -38,7 +39,7 @@ FuryRouter attempts to improve on this by:
 
 **Perfect for APIs:** The router design encourages to build sensible, hierarchical RESTful APIs. Moreover it has builtin native support for [OPTIONS requests](http://zacstewart.com/2012/04/14/http-options-method.html) and `405 Method Not Allowed` replies.
 
-Of course you can also set **custom [`NotFound`][Router.NotFound] and  [`MethodNotAllowed`][Router.HandleMethodNotAllowed] handlers** and [**serve static files**][Router.ServeFiles].
+Of course you can also set **custom [`NotFound`][Router.NotFound] and  [`MethodNotAllowed`][Router.MethodNotAllowed] handlers** and [**serve static files**][Router.ServeFiles].
 
 ## Usage
 
@@ -163,12 +164,14 @@ But this approach sidesteps the strict core rules of this router to avoid routin
 You might try one of the following more high-level 3rd-party web frameworks building upon the FuryRouter package:
 
 [benchmark]: <https://github.com/julienschmidt/go-http-routing-benchmark>
+[httprouter]: <https://github.com/julienschmidt/httprouter>
 [fasthttp]: <https://godoc.org/github.com/valyala/fasthttp>
 [fasthttp.switch]: <https://github.com/valyala/fasthttp#switching-from-nethttp-to-fasthttp>
 [fasthttp.RequestHandler]: <https://godoc.org/github.com/valyala/fasthttp#RequestHandler>
 [http.ServeMux]: <https://golang.org/pkg/net/http/#ServeMux>
 [Router.Handle]: <https://godoc.org/github.com/gofury/furyrouter#Router.Handle>
 [Router.HandleMethodNotAllowed]: <https://godoc.org/github.com/gofury/furyrouter#Router.HandleMethodNotAllowed>
+[Router.MethodNotAllowed]: <https://godoc.org/github.com/gofury/furyrouter#Router.MethodNotAllowed>
 [Router.Handler]: <https://godoc.org/github.com/gofury/furyrouter#Router.Handler>
 [Router.NotFound]: <https://godoc.org/github.com/gofury/furyrouter#Router.NotFound>
 [Router.PanicHandler]: <https://godoc.org/github.com/gofury/furyrouter#Router.PanicHandler>
